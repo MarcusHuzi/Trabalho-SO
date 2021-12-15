@@ -25,7 +25,7 @@ private:
     // Indica se o nível foi ou não finalizado.
     bool finished;
 
-    // Conjunto de pedidos atuais.
+    // Conjuntos de pedidos atuais.
     set<Order *> current_orders;
 
     // Semáforo da cozinha.

@@ -40,7 +40,7 @@ void LevelController::process_order(Order *order){
     order->decrement_clock();
 
     // Imprime o pedido
-    cout << order->to_string() << endl;
+    cout << order->to_string() << endl << flush;
 
     // Verificação de relógio nulo
     if(order->get_clock() <= 0){
@@ -65,7 +65,7 @@ void LevelController::process_order(Order *order){
             
             // Se falhou, avisar o controlador
             case FAILED:
-                LevelController::finished = true;
+                // LevelController::finished = true;
                 break;
             
             // Se finalizado
