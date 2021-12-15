@@ -29,6 +29,43 @@ using namespace std;
 
 ////////////////////////// FUNÇÕES AUXILIARES /////////////////////////////////
 
+/**
+ * Thread controladora de um pedido; utiliza semáforos para 
+ * determinar se deve ou não executar em determinado instante.
+ * 
+ * @param controller Controlador do nível atual.
+ * @param order Pedido a ser monitorado.
+ */
+void order_thread_controller(LevelController *controller, Order *order){
+
+	// Espera por uma mesa
+    sem_wait(controller->get_tables_semaphore());
+
+    // Adição ao controlador
+    controller->insert_order(order);
+
+    // Entrada na cozinha
+    if(order->get_status() == WAITING){
+
+        // Espera pela liberação da cozinha
+        sem_wait(controller->get_kitchen_semaphore());
+
+        // Verificação de validação
+        if(order->get_status() == WAITING)
+            order->set_status(PREPARING);
+    }
+
+    // Saída da cozinha
+    if(order->get_status() == PREPARING){
+        while(order->get_clock() > 0);
+        sem_post(controller->get_kitchen_semaphore());
+        order->set_status(SERVING);
+        while(order->get_clock() > 0);
+    }
+
+    // Liberação da mesa
+    sem_post(controller->get_tables_semaphore());
+}
 
 
 //////////////////////////////// MAIN() ///////////////////////////////////////
@@ -41,12 +78,17 @@ int main(void){
 	Order order_c = Order(37, 7);
 
 	// Controlador
-	LevelController controller;
+	LevelController controller(5);
 
-	// Inserção dos pedidos
-	controller.insert_order(&order_a);
-	controller.insert_order(&order_b);
-	controller.insert_order(&order_c);
+	// Declaração das threads
+	thread ta = thread(order_thread_controller, &controller, &order_a);
+	thread tb = thread(order_thread_controller, &controller, &order_b);
+	thread tc = thread(order_thread_controller, &controller, &order_c);
+
+	// Inicialização das threads
+	ta.join();
+	tb.join();
+	tc.join();
 
 	// Inicialização da thread do controlador
 	controller.start_thread();

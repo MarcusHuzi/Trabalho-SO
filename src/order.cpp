@@ -5,12 +5,12 @@ using namespace std;
 // Bibliotecas-padrão
 #include <string>
 #include <thread>
+#include <semaphore.h>
 
 // Bibliotecas locais
 #include "../lib/order.hpp"
 
-
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////// MÉTODOS PRIVADOS ///////////////////////////////////
 
 // Construtor do pedido.
 Order::Order(int id, int max_waiting_time){
@@ -19,6 +19,8 @@ Order::Order(int id, int max_waiting_time){
     Order::status = WAITING;
 }
 
+
+////////////////////////// MÉTODOS PÚBLICOS ///////////////////////////////////
 
 // Operador de comparação.
 bool operator< (const Order &left, const Order &right) {
@@ -43,6 +45,8 @@ void Order::set_status(OrderStatus status){
         Order::clock = 3;
     else if(status == FAILED)
         Order::clock = 1;
+    else
+        Order::clock = 15;
 }
 
 
@@ -82,13 +86,4 @@ string Order::to_string(){
             break;
     }
     return output;
-}
-
-
-// Reduz o relógio do pedido a cada segundo.
-void order_clock_reducer_thread(Order *order){
-	while(order->get_clock() > 0){
-		order->decrement_clock();
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-	}
 }

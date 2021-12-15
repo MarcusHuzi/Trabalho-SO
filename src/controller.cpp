@@ -16,23 +16,25 @@ using namespace std;
 
 // Limpeza de console dependente do SO
 #ifdef __unix__
-#define clear_console() system("clear")
+    #define clear_console() system("clear")
 #elif defined(_WIN32) || defined(WIN32)
-#define clear_console() system("CLS")
+    #define clear_console() system("CLS")
 #endif
 
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////// MÉTODOS PRIVADOS ///////////////////////////////////
 
-// Construtor.
-LevelController::LevelController(){
+// Construtores.
+LevelController::LevelController(unsigned int tables){
     LevelController::finished = false;
     LevelController::self_thread = thread(&LevelController::thread_controller, this);
+    sem_init(&(LevelController::kitchen), 0, 1);
+    sem_init(&(LevelController::tables), 0, tables);
 }
 
 
-// Processa um pedido; retorna verdadeiro se o pedido deve ser removido.
-bool LevelController::process_order(Order *order){
+// Realiza operações de processamento de um pedido corrente.
+void LevelController::process_order(Order *order){
 
     // Decremento de relógio
     order->decrement_clock();
@@ -64,14 +66,13 @@ bool LevelController::process_order(Order *order){
             // Se falhou, avisar o controlador
             case FAILED:
                 LevelController::finished = true;
-                return true;
+                break;
             
             // Se finalizado
             default:
-                return true;
+                break;
         }
     }
-    return false;
 }
 
 
@@ -94,14 +95,8 @@ void LevelController::thread_controller(){
         clear_console();
 
         // Percorre todos os pedidos atuais e os processa
-        for(order_itr = LevelController::current_orders.begin(); order_itr != LevelController::current_orders.end(); ){
-            
-            // Processo o pedido e verifica se deve ser removido
-            if( LevelController::process_order(*order_itr) == true ){
-                LevelController::current_orders.erase(order_itr++);
-            }else{
-                ++order_itr;
-            }
+        for(order_itr = LevelController::current_orders.begin(); order_itr != LevelController::current_orders.end(); ++order_itr){
+            LevelController::process_order(*order_itr);
         }
 
         // Contagem do tempo decorrido
@@ -110,65 +105,30 @@ void LevelController::thread_controller(){
         // Faz com que a thread durma por um segundo
         std::this_thread::sleep_for(chrono::milliseconds(1000 - elapsed_time));
     }
+    
+    // Destruição dos semáforos
+    sem_destroy(&(LevelController::kitchen));
+    sem_destroy(&(LevelController::tables));
 }
 
 
-/*
-// Realiza operações relativas a um avanço no nível.
-void LevelController::step(){
-
-    return;
-    // Iteração ao longo dos pedidos
-    set<Order *>::iterator itr;
-    for(itr = LevelController::current_orders.begin(); itr != LevelController::current_orders.end(); ){
-
-        // Verificação de relógio
-        if((*itr)->get_clock() <= 0){
-            
-            // Modificação de estado
-            switch((*itr)->get_status()){
-                
-                // De espera para falha
-                case WAITING:
-                    cout << "finished";
-                    LevelController::finished = true;
-                    (*itr)->set_status(FAILED);
-                    ++itr;
-                    break;
-                
-                // De preparação para servindo
-                case PREPARING:
-                    (*itr)->set_status(SERVING);
-                    ++itr;
-                    break;
-                
-                // De servindo para finalizado
-                case SERVING:
-                    (*itr)->set_status(FULLFILLED);
-                    ++itr;
-                    break;
-                
-                // Se finalizado, é removido
-                case FULLFILLED:
-                    LevelController::current_orders.erase(itr++);
-                    break;
-                
-                // Nada acontece
-                default:
-                    ++itr;
-                    break;
-            }
-        }else{
-            ++itr;
-        }
-    }
-}
-*/
-
+////////////////////////// MÉTODOS PÚBLICOS ///////////////////////////////////
 
 // Retorna se o nível fora ou não finalizado.
 bool LevelController::has_finished(){ 
     return LevelController::finished;
+}
+
+
+/// Retorna ponteiro para o semáforo da cozinha.
+sem_t *LevelController::get_kitchen_semaphore(){
+    return &(LevelController::kitchen);
+}
+
+
+/// Retorna ponteiro para o semáforo das mesas.
+sem_t *LevelController::get_tables_semaphore(){
+    return &(LevelController::tables);
 }
 
 

@@ -31,19 +31,28 @@ private:
     // Semáforo da cozinha.
     sem_t kitchen;
 
-    /// Processa um pedido; retorna verdadeiro se o pedido deve ser removido.
-    bool process_order(Order *order);
+    // Semáforo das mesas
+    sem_t tables;
+
+    /// Realiza operações de processamento de um pedido corrente.
+    void process_order(Order *order);
 
     /// Operador para controle da thread.
     void thread_controller();
 
 public:
 
-    // Construtor.
-    LevelController();
+    // Construtores.
+    LevelController(unsigned int tables);
 
     /// Retorna se o nível fora ou não finalizado.
     bool has_finished();
+
+    /// Retorna ponteiro para o semáforo da cozinha.
+    sem_t *get_kitchen_semaphore();
+
+    /// Retorna ponteiro para o semáforo das mesas.
+    sem_t *get_tables_semaphore();
 
     /// Inserção de um novo pedido; inicia uma thread para ele.
     void insert_order(Order *order);
