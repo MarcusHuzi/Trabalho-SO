@@ -1,18 +1,24 @@
 #ifndef _ORDER_H_
 #define _ORDER_H_
 
+///////////////////////////// IMPORTAÇÕES /////////////////////////////////////
+
+using namespace std;
+#include <string>
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Estado de um pedido em um restaurante.
 enum OrderStatus {
     WAITING, 
     PREPARING, 
-    SERVED, 
-    FULLFILLED
+    SERVING, 
+    FULLFILLED, 
+    FAILED
 };
 
 
-// Representa um pedido em um restaurante.
+/// Representa um pedido em um restaurante.
 class Order {
 private:
 
@@ -35,6 +41,9 @@ public:
     */
     Order(int id, int max_waiting_time);
 
+    /// Compara dois pedidos com base em seu número de identificação.
+    friend bool operator< (const Order &left, const Order &right);
+
     /// Retorna o número identificador do pedido.
     int get_id();
 
@@ -52,10 +61,13 @@ public:
 
     /// Decrementa o relógio atual da classe em uma unidade.
     void decrement_clock();
+
+    /// Retorna uma visualização do pedido.
+    string to_string();
 };
 
 
-/// Função para thread que reduz o relógio do pedido em uma unidade a cada segundo.
+/// Função para thread que reduz o relógio do pedido em uma unidade a cada segundo até zerá-lo.
 void order_clock_reducer_thread(Order *order);
 
 ///////////////////////////////////////////////////////////////////////////////

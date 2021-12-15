@@ -5,8 +5,8 @@ RM = rm -f
 CFLAGS = -Wall -Wextra
 BIN = so_game
 ZIP = so_game.zip
-OBJ = obj/main.o obj/order.o
-LIB = lib/order.hpp
+OBJ = obj/main.o obj/order.o obj/controller.o
+LIB = lib/order.hpp lib/controller.hpp
 
 # ------------------- # --- DIRETIVAS PRINCIPAIS --- # -------------------- #
 
@@ -15,7 +15,7 @@ all: $(BIN)
 
 # Produção do executável
 $(BIN): $(OBJ)
-	$(CPP) -pthread -I lib/ $(OBJ) -o $(BIN)
+	$(CPP) -pthread -lpthread -lrt -I lib/ $(OBJ) -o $(BIN)
 
 # Execução convencional do programa
 run:
@@ -40,3 +40,6 @@ obj/main.o: src/main.cpp $(LIB)
 
 obj/order.o: src/order.cpp lib/order.hpp
 	$(CPP) -c src/order.cpp -o obj/order.o $(CFLAGS)
+
+obj/controller.o: src/controller.cpp lib/order.hpp lib/controller.hpp
+	$(CPP) -c src/controller.cpp -o obj/controller.o $(CFLAGS)
