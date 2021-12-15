@@ -31,3 +31,6 @@
 *.out
 *.app
 so_game
+
+# IDE files
+.vscode/*
