@@ -44,7 +44,7 @@ void Order::set_status(OrderStatus status){
     if(status == FULLFILLED)
         Order::clock = 3;
     else if(status == FAILED)
-        Order::clock = 1;
+        Order::clock = 3;
     else
         Order::clock = 8;
 }

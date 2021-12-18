@@ -12,7 +12,8 @@ using namespace std;
 
 // Bibliotecas locais
 #include "../lib/order.hpp"
-#include "../lib/controller.hpp"
+#include "../lib/level_controller.hpp"
+#include "../lib/order_controller.hpp"
 
 // Limpeza de console dependente do SO
 #ifdef __unix__
@@ -23,15 +24,6 @@ using namespace std;
 
 
 ////////////////////////// MÉTODOS PRIVADOS ///////////////////////////////////
-
-// Construtores.
-LevelController::LevelController(unsigned int tables){
-    LevelController::finished = false;
-    LevelController::self_thread = thread(&LevelController::thread_controller, this);
-    sem_init(&(LevelController::kitchen), 0, 1);
-    sem_init(&(LevelController::tables), 0, tables);
-}
-
 
 // Realiza operações de processamento de um pedido corrente.
 void LevelController::process_order(Order *order){
@@ -80,7 +72,7 @@ void LevelController::process_order(Order *order){
 void LevelController::thread_controller(){
 
     // Iterador dos pedidos
-    set<Order *>::iterator order_itr;
+    set<OrderController *>::iterator order_itr;
 
     // Usado para computar tempo decorrido
     chrono::steady_clock::time_point start_time;
@@ -95,8 +87,16 @@ void LevelController::thread_controller(){
         clear_console();
 
         // Percorre todos os pedidos atuais e os processa
-        for(order_itr = LevelController::current_orders.begin(); order_itr != LevelController::current_orders.end(); ++order_itr){
-            LevelController::process_order(*order_itr);
+        for(order_itr = LevelController::current_orders.begin(); order_itr != LevelController::current_orders.end();){
+
+            // Processamento
+            LevelController::process_order((*order_itr)->get_order());
+
+            // Possível remoção
+            if((*order_itr)->is_removed() == true)
+                LevelController::current_orders.erase(order_itr++);
+            else
+                ++order_itr;
         }
 
         // Contagem do tempo decorrido
@@ -107,12 +107,21 @@ void LevelController::thread_controller(){
     }
     
     // Destruição dos semáforos
-    sem_destroy(&(LevelController::kitchen));
-    sem_destroy(&(LevelController::tables));
+    // sem_destroy(&(LevelController::kitchen));
+    // sem_destroy(&(LevelController::tables));
 }
 
 
 ////////////////////////// MÉTODOS PÚBLICOS ///////////////////////////////////
+
+// Construtor.
+LevelController::LevelController(unsigned int tables){
+    LevelController::finished = false;
+    LevelController::self_thread = thread(&LevelController::thread_controller, this);
+    sem_init(&(LevelController::kitchen), 0, 1);
+    sem_init(&(LevelController::tables), 0, tables);
+}
+
 
 // Retorna se o nível fora ou não finalizado.
 bool LevelController::has_finished(){ 
@@ -120,34 +129,17 @@ bool LevelController::has_finished(){
 }
 
 
-/// Retorna ponteiro para o semáforo da cozinha.
-sem_t *LevelController::get_kitchen_semaphore(){
-    return &(LevelController::kitchen);
-}
-
-
-/// Retorna ponteiro para o semáforo das mesas.
-sem_t *LevelController::get_tables_semaphore(){
-    return &(LevelController::tables);
-}
-
-
 // Inserção de um novo pedido; inicia uma thread para ele.
 void LevelController::insert_order(Order *order){
-    LevelController::current_orders.insert(order);
-}
-
-
-// Remove um pedido atual se ele existir.
-void LevelController::remove_order(Order *order){
-    set<Order *>::iterator itr = LevelController::current_orders.find(order);
-    if(itr != LevelController::current_orders.end()){
-        LevelController::current_orders.erase(itr);
-    }
+    OrderController *order_controller = new OrderController(order, &(LevelController::kitchen), &(LevelController::tables));
+    LevelController::current_orders.insert(order_controller);
 }
 
 
 // Inicializa a thread do controlador.
 void LevelController::start_thread(){
+    set<OrderController *>::iterator itr;
+    for(itr = LevelController::current_orders.begin(); itr != LevelController::current_orders.end(); ++itr)
+        (*itr)->start_thread();
     LevelController::self_thread.join();
 }

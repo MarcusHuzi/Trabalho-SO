@@ -1,5 +1,5 @@
-#ifndef _CONTROLLER_H_
-#define _CONTROLLER_H_
+#ifndef _LEVEL_CONTROLLER_H_
+#define _LEVEL_CONTROLLER_H_
 
 ///////////////////////////// IMPORTAÇÕES /////////////////////////////////////
 
@@ -12,6 +12,7 @@ using namespace std;
 
 // Bibliotecas locais
 #include "../lib/order.hpp"
+#include "../lib/order_controller.hpp"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -26,7 +27,7 @@ private:
     bool finished;
 
     // Conjuntos de pedidos atuais.
-    set<Order *> current_orders;
+    set<OrderController *> current_orders;
 
     // Semáforo da cozinha.
     sem_t kitchen;
@@ -48,17 +49,8 @@ public:
     /// Retorna se o nível fora ou não finalizado.
     bool has_finished();
 
-    /// Retorna ponteiro para o semáforo da cozinha.
-    sem_t *get_kitchen_semaphore();
-
-    /// Retorna ponteiro para o semáforo das mesas.
-    sem_t *get_tables_semaphore();
-
     /// Inserção de um novo pedido; inicia uma thread para ele.
     void insert_order(Order *order);
-
-    /// Remove um pedido atual se ele existir.
-    void remove_order(Order *order);
 
     /// Inicializa a thread do controlador.
     void start_thread();
