@@ -6,7 +6,6 @@ using namespace std;
 #include <iostream>
 #include <string>
 #include <thread>
-#include <semaphore.h>
 
 // Bibliotecas locais
 #include "../lib/order_controller.hpp"
@@ -15,16 +14,17 @@ using namespace std;
 ////////////////////////// MÉTODOS PRIVADOS ///////////////////////////////////
 
 // Lógica da thread do controlador do pedido.
-void OrderController::thread_logic(sem_t *kitchen, sem_t *tables){
+void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tables){
 
     // Espera por uma mesa
-    sem_wait(tables);
+    tables->wait();
+    OrderController::active = true;
 
     // Entrada na cozinha
     if(OrderController::order->get_status() == WAITING){
 
         // Espera pela liberação da cozinha
-        sem_wait(kitchen);
+        kitchen->wait();
 
         // Verificação de validação
         if(OrderController::order->get_status() == WAITING)
@@ -38,7 +38,7 @@ void OrderController::thread_logic(sem_t *kitchen, sem_t *tables){
         while(OrderController::order->get_clock() > 0);
 
         // Libera a vaga da cozinha
-        sem_post(kitchen);
+        kitchen->release();
 
         // Atualiza para estado de servindo
         OrderController::order->set_status(SERVING);
@@ -47,21 +47,23 @@ void OrderController::thread_logic(sem_t *kitchen, sem_t *tables){
         while(OrderController::order->get_clock() > 0);
     }
 
-    // Marca como removido
+    // Marca como removido e inativo
     OrderController::removed = true;
+    OrderController::active = false;
 
     // Liberação da mesa
-    sem_post(tables);
+    tables->release();
 }
 
 
 ////////////////////////// MÉTODOS PÚBLICOS ///////////////////////////////////
 
 // Construtor.
-OrderController::OrderController(Order *order, sem_t *kitchen, sem_t *tables){
+OrderController::OrderController(Order *order, OrderSemaphore *kitchen, OrderSemaphore *tables){
     OrderController::order = order;
     OrderController::self_thread = thread(&OrderController::thread_logic, this, kitchen, tables);
     OrderController::removed = false;
+    OrderController::active = false;
 }
 
 
@@ -74,6 +76,12 @@ bool operator< (const OrderController &left, const OrderController &right){
 // Indica se foi ou não logicamente removido.
 bool OrderController::is_removed(){
     return OrderController::removed;
+}
+
+
+// Indica se está ou não ativo.
+bool OrderController::is_active(){
+    return OrderController::active;
 }
 
 

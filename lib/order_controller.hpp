@@ -7,10 +7,10 @@ using namespace std;
 
 // Bibliotecas-padrão
 #include <thread>
-#include <semaphore.h>
 
 // Bibliotecas locais
 #include "../lib/order.hpp"
+#include "../lib/order_semaphore.hpp"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -24,22 +24,25 @@ private:
     // Própria thread.
     thread self_thread;
 
-    // Indica se foi ou não removido (para sincronização).
-    bool removed;
+    // Utilitários de sincronização.
+    bool removed, active;
 
     // Função de controle da thread interna.
-    void thread_logic(sem_t *kitchen, sem_t *tables);
+    void thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tables);
 
 public:
 
     /// Construtor.
-    OrderController(Order *order, sem_t *kitchen, sem_t *tables);
+    OrderController(Order *order, OrderSemaphore *kitchen, OrderSemaphore *tables);
 
     /// Operador de comparação.
     friend bool operator< (const OrderController &left, const OrderController &right);
 
     /// Retorna se foi ou não logicamente removido.
     bool is_removed();
+
+    /// Retorna se está ou não atualmente ativo.
+    bool is_active();
 
     /// Retorna referência para o pedido.
     Order *get_order();

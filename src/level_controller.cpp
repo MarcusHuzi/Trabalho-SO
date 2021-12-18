@@ -14,6 +14,7 @@ using namespace std;
 #include "../lib/order.hpp"
 #include "../lib/level_controller.hpp"
 #include "../lib/order_controller.hpp"
+#include "../lib/order_semaphore.hpp"
 
 // Limpeza de console dependente do SO
 #ifdef __unix__
@@ -90,13 +91,16 @@ void LevelController::thread_controller(){
         for(order_itr = LevelController::current_orders.begin(); order_itr != LevelController::current_orders.end();){
 
             // Processamento
-            LevelController::process_order((*order_itr)->get_order());
+            if((*order_itr)->is_active() == true){
+                LevelController::process_order((*order_itr)->get_order());
+            }
 
             // Possível remoção
-            if((*order_itr)->is_removed() == true)
+            if((*order_itr)->is_removed() == true){
                 LevelController::current_orders.erase(order_itr++);
-            else
+            }else{
                 ++order_itr;
+            }
         }
 
         // Contagem do tempo decorrido
@@ -105,10 +109,6 @@ void LevelController::thread_controller(){
         // Faz com que a thread durma por um segundo
         std::this_thread::sleep_for(chrono::milliseconds(1000 - elapsed_time));
     }
-    
-    // Destruição dos semáforos
-    // sem_destroy(&(LevelController::kitchen));
-    // sem_destroy(&(LevelController::tables));
 }
 
 
@@ -118,8 +118,8 @@ void LevelController::thread_controller(){
 LevelController::LevelController(unsigned int tables){
     LevelController::finished = false;
     LevelController::self_thread = thread(&LevelController::thread_controller, this);
-    sem_init(&(LevelController::kitchen), 0, 1);
-    sem_init(&(LevelController::tables), 0, tables);
+    LevelController::kitchen = OrderSemaphore();
+    LevelController::tables = OrderSemaphore(tables);
 }
 
 

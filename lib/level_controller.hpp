@@ -8,11 +8,11 @@ using namespace std;
 // Bibliotecas-padrão
 #include <set>
 #include <thread>
-#include <semaphore.h>
 
 // Bibliotecas locais
 #include "../lib/order.hpp"
 #include "../lib/order_controller.hpp"
+#include "../lib/order_semaphore.hpp"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -30,10 +30,10 @@ private:
     set<OrderController *> current_orders;
 
     // Semáforo da cozinha.
-    sem_t kitchen;
+    OrderSemaphore kitchen;
 
     // Semáforo das mesas
-    sem_t tables;
+    OrderSemaphore tables;
 
     /// Realiza operações de processamento de um pedido corrente.
     void process_order(Order *order);

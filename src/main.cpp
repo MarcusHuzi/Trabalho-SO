@@ -44,7 +44,7 @@ int main(void){
     Order order_f = Order(91, 14);
 
 	// Controlador
-	LevelController controller(3);
+	LevelController controller = LevelController(3);
 
     // Inserção dos pedidos
     controller.insert_order(&order_a);
