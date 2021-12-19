@@ -41,7 +41,7 @@ obj/main.o: src/main.cpp $(LIB)
 obj/order.o: src/order.cpp lib/order.hpp
 	$(CPP) -c src/order.cpp -o obj/order.o $(CFLAGS)
 
-obj/order_semaphore.o: src/order_semaphore.cpp lib/order_semaphore.hpp
+obj/order_semaphore.o: src/order_semaphore.cpp lib/order_semaphore.hpp lib/order.hpp
 	$(CPP) -c src/order_semaphore.cpp -o obj/order_semaphore.o $(CFLAGS)
 
 obj/order_controller.o: src/order_controller.cpp lib/order_controller.hpp lib/order.hpp lib/order_semaphore.hpp

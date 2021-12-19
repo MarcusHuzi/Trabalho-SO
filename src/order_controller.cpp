@@ -6,6 +6,7 @@ using namespace std;
 #include <iostream>
 #include <string>
 #include <thread>
+#include <chrono>
 
 // Bibliotecas locais
 #include "../lib/order_controller.hpp"
@@ -14,38 +15,31 @@ using namespace std;
 ////////////////////////// MÉTODOS PRIVADOS ///////////////////////////////////
 
 // Lógica da thread do controlador do pedido.
-void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tables){
+void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tables, int *current_life){
 
     // Espera por uma mesa
-    tables->wait();
+    if(tables->wait(OrderController::order, current_life) == false) return;
     OrderController::active = true;
 
-    // Entrada na cozinha
-    if(OrderController::order->get_status() == WAITING){
+    // Espera pela liberação da cozinha
+    if(kitchen->wait(OrderController::order, current_life) == false) return;
 
-        // Espera pela liberação da cozinha
-        kitchen->wait();
+    // Estado de preparação
+    OrderController::order->set_status(PREPARING);
 
-        // Verificação de validação
-        if(OrderController::order->get_status() == WAITING)
-            OrderController::order->set_status(PREPARING);
-    }
+    // Espera pelo relógio chegar a zero.
+    while(OrderController::order->get_clock() > 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(800));
 
-    // Saída da cozinha
-    if(OrderController::order->get_status() == PREPARING){
+    // Libera a vaga da cozinha
+    kitchen->release();
 
-        // Espera pelo relógio chegar a zero.
-        while(OrderController::order->get_clock() > 0);
+    // Atualiza para estado de servindo
+    OrderController::order->set_status(SERVING);
 
-        // Libera a vaga da cozinha
-        kitchen->release();
-
-        // Atualiza para estado de servindo
-        OrderController::order->set_status(SERVING);
-
-        // Espera pelo relógio chegar a zero novamente
-        while(OrderController::order->get_clock() > 0);
-    }
+    // Espera pelo relógio chegar a zero novamente
+    while(OrderController::order->get_clock() > 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(800));
 
     // Marca como removido e inativo
     OrderController::removed = true;
@@ -59,9 +53,9 @@ void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tabl
 ////////////////////////// MÉTODOS PÚBLICOS ///////////////////////////////////
 
 // Construtor.
-OrderController::OrderController(Order *order, OrderSemaphore *kitchen, OrderSemaphore *tables){
+OrderController::OrderController(Order *order, OrderSemaphore *kitchen, OrderSemaphore *tables, int *current_life){
     OrderController::order = order;
-    OrderController::self_thread = thread(&OrderController::thread_logic, this, kitchen, tables);
+    OrderController::self_thread = thread(&OrderController::thread_logic, this, kitchen, tables, current_life);
     OrderController::removed = false;
     OrderController::active = false;
 }

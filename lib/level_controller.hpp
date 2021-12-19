@@ -35,6 +35,9 @@ private:
     // Semáforo das mesas
     OrderSemaphore tables;
 
+    // Vidas atuais do jogador
+    int current_life;
+
     /// Realiza operações de processamento de um pedido corrente.
     void process_order(Order *order);
 
@@ -43,8 +46,8 @@ private:
 
 public:
 
-    // Construtores.
-    LevelController(unsigned int tables);
+    // Construtor.
+    LevelController(unsigned int tables, int max_life);
 
     /// Retorna se o nível fora ou não finalizado.
     bool has_finished();

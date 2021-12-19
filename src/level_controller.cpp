@@ -58,7 +58,8 @@ void LevelController::process_order(Order *order){
             
             // Se falhou, avisar o controlador
             case FAILED:
-                // LevelController::finished = true;
+                if(LevelController::current_life > 0)
+                    LevelController::current_life -= 1;
                 break;
             
             // Se finalizado
@@ -103,6 +104,10 @@ void LevelController::thread_controller(){
             }
         }
 
+        // Verificação de finalização
+        if(LevelController::current_orders.size() == 0 || LevelController::current_life <= 0)
+            LevelController::finished = true;
+
         // Contagem do tempo decorrido
         auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start_time).count();
 
@@ -115,11 +120,12 @@ void LevelController::thread_controller(){
 ////////////////////////// MÉTODOS PÚBLICOS ///////////////////////////////////
 
 // Construtor.
-LevelController::LevelController(unsigned int tables){
+LevelController::LevelController(unsigned int tables, int max_life){
     LevelController::finished = false;
     LevelController::self_thread = thread(&LevelController::thread_controller, this);
     LevelController::kitchen = OrderSemaphore();
     LevelController::tables = OrderSemaphore(tables);
+    LevelController::current_life = max_life;
 }
 
 
@@ -131,7 +137,7 @@ bool LevelController::has_finished(){
 
 // Inserção de um novo pedido; inicia uma thread para ele.
 void LevelController::insert_order(Order *order){
-    OrderController *order_controller = new OrderController(order, &(LevelController::kitchen), &(LevelController::tables));
+    OrderController *order_controller = new OrderController(order, &(LevelController::kitchen), &(LevelController::tables), &(LevelController::current_life));
     LevelController::current_orders.insert(order_controller);
 }
 

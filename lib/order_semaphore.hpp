@@ -7,7 +7,7 @@
 class OrderSemaphore{
 private:
 
-    // Sinais de controle
+    // Sinais de controle.
     unsigned int max_signal;
     unsigned int current_signal;
 
@@ -23,8 +23,15 @@ public:
      */
     OrderSemaphore(unsigned int max_signal);
 
-    /// Espera pela liberação de um sinal do semáforo.
-    void wait();
+    /** 
+     * Espera pela liberação de um sinal do semáforo. 
+     * @param order referência ao pedido ao qual se está aguardando.
+     * @param current_life referência à vida atual do jogador.
+     * @return verdadeiro se a espera terminara de forma convencional, 
+     * ou falso, caso a espera tenha sido encerrada devido a um sinal 
+     * do pedido.
+     * */
+    bool wait(Order *order, int *current_life);
 
     /// Libera um sinal do semáforo.
     void release();

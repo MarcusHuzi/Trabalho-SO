@@ -28,12 +28,12 @@ private:
     bool removed, active;
 
     // Função de controle da thread interna.
-    void thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tables);
+    void thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tables, int *current_life);
 
 public:
 
     /// Construtor.
-    OrderController(Order *order, OrderSemaphore *kitchen, OrderSemaphore *tables);
+    OrderController(Order *order, OrderSemaphore *kitchen, OrderSemaphore *tables, int *current_life);
 
     /// Operador de comparação.
     friend bool operator< (const OrderController &left, const OrderController &right);
