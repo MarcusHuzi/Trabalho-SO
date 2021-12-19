@@ -12,24 +12,42 @@ using namespace std;
 #include "../lib/order_controller.hpp"
 #include "../lib/order.hpp"
 
+/////////////////////////// FUNÇÃO AUXILIAR ///////////////////////////////////
+
+// Força a thread requisitante a dormir enquanto não zerar o relógio do pedido.
+void wait_for_orders_clock(Order *order){
+    while(order->get_clock() > 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(800));
+}
+
+
 ////////////////////////// MÉTODOS PRIVADOS ///////////////////////////////////
 
 // Lógica da thread do controlador do pedido.
 void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tables, int *current_life){
 
     // Espera por uma mesa
-    if(tables->wait(OrderController::order, current_life) == false) return;
+    if(tables->wait(OrderController::order, current_life) == false) {
+        wait_for_orders_clock(OrderController::order);
+        OrderController::active = false;
+        OrderController::removed = true;
+        return;
+    }
     OrderController::active = true;
 
     // Espera pela liberação da cozinha
-    if(kitchen->wait(OrderController::order, current_life) == false) return;
+    if(kitchen->wait(OrderController::order, current_life) == false){
+        wait_for_orders_clock(OrderController::order);
+        OrderController::active = false;
+        OrderController::removed = true;
+        return;
+    }
 
     // Estado de preparação
     OrderController::order->set_status(PREPARING);
 
     // Espera pelo relógio chegar a zero.
-    while(OrderController::order->get_clock() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(800));
+    wait_for_orders_clock(OrderController::order);
 
     // Libera a vaga da cozinha
     kitchen->release();
@@ -38,8 +56,7 @@ void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tabl
     OrderController::order->set_status(SERVING);
 
     // Espera pelo relógio chegar a zero novamente
-    while(OrderController::order->get_clock() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(800));
+    wait_for_orders_clock(OrderController::order);
 
     // Marca como removido e inativo
     OrderController::removed = true;
