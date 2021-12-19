@@ -14,9 +14,10 @@ using namespace std;
 
 /////////////////////////// FUNÇÃO AUXILIAR ///////////////////////////////////
 
-// Força a thread requisitante a dormir enquanto não zerar o relógio do pedido.
-void wait_for_orders_clock(Order *order){
-    while(order->get_clock() > 0)
+/* Força a thread requisitante a dormir enquanto não zerar o 
+relógio do pedido e enquanto não zerar a vida do jogador. */
+void wait_for_orders_clock(Order *order, int *current_life){
+    while(order->get_clock() > 0 && (*current_life) > 0)
         std::this_thread::sleep_for(std::chrono::milliseconds(800));
 }
 
@@ -28,7 +29,7 @@ void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tabl
 
     // Espera por uma mesa
     if(tables->wait(OrderController::order, current_life) == false) {
-        wait_for_orders_clock(OrderController::order);
+        wait_for_orders_clock(OrderController::order, current_life);
         OrderController::active = false;
         OrderController::removed = true;
         return;
@@ -37,9 +38,10 @@ void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tabl
 
     // Espera pela liberação da cozinha
     if(kitchen->wait(OrderController::order, current_life) == false){
-        wait_for_orders_clock(OrderController::order);
+        wait_for_orders_clock(OrderController::order, current_life);
         OrderController::active = false;
         OrderController::removed = true;
+        tables->release();
         return;
     }
 
@@ -47,7 +49,7 @@ void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tabl
     OrderController::order->set_status(PREPARING);
 
     // Espera pelo relógio chegar a zero.
-    wait_for_orders_clock(OrderController::order);
+    wait_for_orders_clock(OrderController::order, current_life);
 
     // Libera a vaga da cozinha
     kitchen->release();
@@ -56,7 +58,7 @@ void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tabl
     OrderController::order->set_status(SERVING);
 
     // Espera pelo relógio chegar a zero novamente
-    wait_for_orders_clock(OrderController::order);
+    wait_for_orders_clock(OrderController::order, current_life);
 
     // Marca como removido e inativo
     OrderController::removed = true;

@@ -24,7 +24,7 @@ private:
     thread self_thread;
 
     // Indica se o nível foi ou não finalizado.
-    bool finished;
+    bool finished, failed;
 
     // Conjuntos de pedidos atuais.
     set<OrderController *> current_orders;
@@ -51,6 +51,9 @@ public:
 
     /// Retorna se o nível fora ou não finalizado.
     bool has_finished();
+
+    /// Retorna se o jogador falhou ou não.
+    bool has_failed();
 
     /// Inserção de um novo pedido; inicia uma thread para ele.
     void insert_order(Order *order);

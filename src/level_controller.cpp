@@ -105,14 +105,31 @@ void LevelController::thread_controller(){
         }
 
         // Verificação de finalização
-        if(LevelController::current_orders.size() == 0 || LevelController::current_life <= 0)
+        if(LevelController::current_orders.size() == 0){
             LevelController::finished = true;
+        }
+
+        // Verificação de falha
+        if(LevelController::current_life <= 0){
+            LevelController::finished = true;
+            LevelController::failed = true;
+        }
 
         // Contagem do tempo decorrido
         auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start_time).count();
 
         // Faz com que a thread durma por um segundo
         std::this_thread::sleep_for(chrono::milliseconds(1000 - elapsed_time));
+    }
+
+    // Limpeza do console.
+    clear_console();
+
+    // Mensagem final.
+    if(LevelController::failed == false){
+        cout << "LEVEL ACCOMPLISHED" << endl;
+    }else{
+        cout << "LEVEL FAILED" << endl;
     }
 }
 
@@ -122,6 +139,7 @@ void LevelController::thread_controller(){
 // Construtor.
 LevelController::LevelController(unsigned int tables, int max_life){
     LevelController::finished = false;
+    LevelController::failed = false;
     LevelController::self_thread = thread(&LevelController::thread_controller, this);
     LevelController::kitchen = OrderSemaphore();
     LevelController::tables = OrderSemaphore(tables);
@@ -132,6 +150,12 @@ LevelController::LevelController(unsigned int tables, int max_life){
 // Retorna se o nível fora ou não finalizado.
 bool LevelController::has_finished(){ 
     return LevelController::finished;
+}
+
+
+// Retorna se o jogador falhou ou não.
+bool LevelController::has_failed(){
+    return LevelController::failed;
 }
 
 

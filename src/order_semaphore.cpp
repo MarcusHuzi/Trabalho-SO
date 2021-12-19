@@ -53,6 +53,8 @@ bool OrderSemaphore::wait(Order *order, int *current_life){
 
 // Libera.
 void OrderSemaphore::release(){
-    if(OrderSemaphore::current_signal > 0)
+    if(OrderSemaphore::current_signal > 0){
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
         OrderSemaphore::current_signal -= 1;
+    }
 }
