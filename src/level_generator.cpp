@@ -15,7 +15,7 @@ LevelGenerator::LevelGenerator(int difficulty){
 
 // Métodos públicos
 Order *LevelGenerator::new_order(){
-    Meal *meal = LevelGenerator::menu->rand_meals();
+    Meal meal = LevelGenerator::menu->rand_meals();
     numberOfOrders++;
-    return new Order(numberOfOrders - 1, meal->get_prep_time() + 10, meal);
+    return new Order(numberOfOrders - 1, meal.get_prep_time() + 10, &meal);
 }

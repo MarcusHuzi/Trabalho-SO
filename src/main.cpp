@@ -42,8 +42,14 @@ void print_options(){
 
 // Função para inserções de operações inválidas
 void print_invalid(){
-	cout << "Você inseriu uma operação inválida..." << endl;
+	cout << "Você inseriu uma operação inválida..." << endl << endl;
 	print_options();
+}
+
+// Função para saída do jogo
+void print_exit(){
+	cout << "Você escolheu sair do jogo" << endl;
+	cout << "Obrigado por jogar!!!" << endl;
 }
 
 //////////////////////////////// MAIN() ///////////////////////////////////////
@@ -75,6 +81,11 @@ int main(void){
 		while(option <= 0 || option > 4){
 			print_invalid();
 			cin >> option;
+		}
+
+		if(option == 4){
+			print_exit();
+			break;
 		}
 
 		// Criando Controlador apropriado

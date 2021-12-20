@@ -9,5 +9,5 @@ Meal::Meal(string name, int prep_time){
 
 
 // Métodos acessores
-string Meal::get_meal_name(){ return name; }
-int Meal::get_prep_time(){ return prep_time; }
+string Meal::get_meal_name(){ return Meal::name; }
+int Meal::get_prep_time(){ return Meal::prep_time; }

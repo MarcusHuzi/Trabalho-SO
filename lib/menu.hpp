@@ -13,7 +13,7 @@ private:
     int max_meals;
 
     // Representa as refeições do menu
-    vector <Meal *> meals;
+    vector <Meal> meals;
 
     // Gera refeições do menu
     void generate_menu();
@@ -23,13 +23,13 @@ public:
     Menu(int max_meals);
 
     // Adiciona refeição ao menu do restaurante
-    void add_meal(Meal *meal);
+    void add_meal(Meal meal);
 
     // Remove refeição do menu do restaurante
-    void remove_meal(Meal *meal);
+    void remove_meal(Meal meal);
 
     // Retorna uma refeição do menu
-    Meal *rand_meals();
+    Meal rand_meals();
 };
 
 #endif /*_MENU_H_*/
