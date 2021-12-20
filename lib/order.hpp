@@ -8,6 +8,9 @@ using namespace std;
 // Bibliotecas-padrão
 #include <string>
 
+// Bibliotecas locais
+#include "../lib/meal.hpp"
+
 //////////////////////////// ENUMERAÇÕES //////////////////////////////////////
 
 // Estado de um pedido em um restaurante.
@@ -35,6 +38,9 @@ private:
     // Estado do pedido.
     OrderStatus status;
 
+    // Refeição desejada
+    Meal *meal;
+
 public:
 
     /**  
@@ -43,7 +49,7 @@ public:
      * ficar em estado de espera, que se trata de seu estado inicial. Desse 
      * modo, o relógio do pedido é inicializado nesse tempo.
     */
-    Order(int id, int max_waiting_time);
+    Order(int id, int max_waiting_time, Meal *meal);
 
     /// Compara dois pedidos com base em seu número de identificação.
     friend bool operator< (const Order &left, const Order &right);

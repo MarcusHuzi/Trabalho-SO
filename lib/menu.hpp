@@ -15,6 +15,9 @@ private:
     // Representa as refeições do menu
     vector <Meal *> meals;
 
+    // Gera refeições do menu
+    void generate_menu();
+
 public:
 
     Menu(int max_meals);
@@ -24,6 +27,9 @@ public:
 
     // Remove refeição do menu do restaurante
     void remove_meal(Meal *meal);
+
+    // Retorna uma refeição do menu
+    Meal *rand_meals();
 };
 
 #endif /*_MENU_H_*/
