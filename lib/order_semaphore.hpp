@@ -1,6 +1,8 @@
 #ifndef _ORDER_SEMAPHORE_H_
 #define _ORDER_SEMAPHORE_H_
 
+#include <semaphore.h>
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /// Classe de semáforo para pedidos em um restaurante.
@@ -10,6 +12,9 @@ private:
     // Sinais de controle.
     unsigned int max_signal;
     unsigned int current_signal;
+
+    // Semáforo auxiliar para sincronização.
+    sem_t signal_semaphore;
 
 public:
 

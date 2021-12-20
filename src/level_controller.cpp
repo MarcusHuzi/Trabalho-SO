@@ -26,50 +26,6 @@ using namespace std;
 
 ////////////////////////// MÉTODOS PRIVADOS ///////////////////////////////////
 
-// Realiza operações de processamento de um pedido corrente.
-void LevelController::process_order(Order *order){
-
-    // Decremento de relógio
-    order->decrement_clock();
-
-    // Imprime o pedido
-    cout << order->to_string() << endl << flush;
-
-    // Verificação de relógio nulo
-    if(order->get_clock() <= 0){
-
-        // Modificação de estado
-        switch(order->get_status()){
-            
-            // De espera para falha
-            case WAITING:
-                order->set_status(FAILED);
-                break;
-            
-            // De preparação para servindo
-            case PREPARING:
-                order->set_status(SERVING);
-                break;
-            
-            // De servindo para finalizado
-            case SERVING:
-                order->set_status(FULLFILLED);
-                break;
-            
-            // Se falhou, avisar o controlador
-            case FAILED:
-                if(LevelController::current_life > 0)
-                    LevelController::current_life -= 1;
-                break;
-            
-            // Se finalizado
-            default:
-                break;
-        }
-    }
-}
-
-
 // Operador para controle da thread.
 void LevelController::thread_controller(){
 
@@ -93,7 +49,21 @@ void LevelController::thread_controller(){
 
             // Processamento
             if((*order_itr)->is_active() == true){
-                LevelController::process_order((*order_itr)->get_order());
+
+                // Captura do pedido
+                Order *order = (*order_itr)->get_order();
+                
+                // Decremento de relógio
+                order->decrement_clock();
+
+                // Imprime o pedido
+                cout << order->to_string() << endl;
+
+                // Verificação de falha
+                if(order->get_status() == FAILED && order->get_clock() <= 0){
+                    if(LevelController::current_life > 0)
+                        LevelController::current_life -= 1;
+                }
             }
 
             // Possível remoção
