@@ -107,13 +107,14 @@ void LevelController::thread_controller(){
 ////////////////////////// MÉTODOS PÚBLICOS ///////////////////////////////////
 
 // Construtor.
-LevelController::LevelController(unsigned int tables, int max_life){
+LevelController::LevelController(unsigned int tables, int max_life, int difficulty){
     LevelController::finished = false;
     LevelController::failed = false;
     LevelController::self_thread = thread(&LevelController::thread_controller, this);
     LevelController::kitchen = OrderSemaphore();
     LevelController::tables = OrderSemaphore(tables);
     LevelController::current_life = max_life;
+    LevelController::lvl_generator = new LevelGenerator(difficulty);
 }
 
 
@@ -130,7 +131,8 @@ bool LevelController::has_failed(){
 
 
 // Inserção de um novo pedido; inicia uma thread para ele.
-void LevelController::insert_order(Order *order){
+void LevelController::insert_order(){
+    Order *order = LevelController::lvl_generator->new_order();
     OrderController *order_controller = new OrderController(order, &(LevelController::kitchen), &(LevelController::tables), &(LevelController::current_life));
     LevelController::current_orders.insert(order_controller);
 }
@@ -142,4 +144,10 @@ void LevelController::start_thread(){
     for(itr = LevelController::current_orders.begin(); itr != LevelController::current_orders.end(); ++itr)
         (*itr)->start_thread();
     LevelController::self_thread.join();
+}
+
+void LevelController::setup_phase(int limit_order){
+    int count = 0;
+    while(count++ != limit_order)
+        LevelController::insert_order();
 }

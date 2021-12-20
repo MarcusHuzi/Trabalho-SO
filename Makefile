@@ -5,8 +5,8 @@ RM = rm -f
 CFLAGS = -Wall -Wextra
 BIN = so_game
 ZIP = so_game.zip
-OBJ = obj/main.o obj/order.o obj/order_controller.o obj/level_controller.o obj/order_semaphore.o obj/meal.o obj/menu.o
-LIB = lib/order.hpp lib/order_controller.hpp lib/level_controller.hpp lib/order_semaphore.hpp lib/meal.hpp lib/menu.hpp
+OBJ = obj/main.o obj/order.o obj/order_controller.o obj/level_controller.o obj/order_semaphore.o obj/meal.o obj/menu.o obj/level_generator.o
+LIB = lib/order.hpp lib/order_controller.hpp lib/level_controller.hpp lib/order_semaphore.hpp lib/meal.hpp lib/menu.hpp lib/level_generator.hpp
 
 # ------------------- # --- DIRETIVAS PRINCIPAIS --- # -------------------- #
 
@@ -55,3 +55,6 @@ obj/meal.o: src/meal.cpp lib/meal.hpp
 
 obj/menu.o: src/menu.cpp lib/menu.hpp
 	$(CPP) -c src/menu.cpp -o obj/menu.o $(CFLAGS)
+
+obj/level_generator: src/level_generator.cpp lib/level_generator.hpp
+	$(CPP) -c src/level_generator.cpp -o obj/level_generator.o $(CFLAGS)

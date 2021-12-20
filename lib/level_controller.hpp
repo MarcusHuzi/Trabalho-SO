@@ -13,6 +13,7 @@ using namespace std;
 #include "../lib/order.hpp"
 #include "../lib/order_controller.hpp"
 #include "../lib/order_semaphore.hpp"
+#include "../lib/level_generator.hpp"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -41,10 +42,13 @@ private:
     /// Operador para controle da thread.
     void thread_controller();
 
+    // Gerador de pedidos
+    LevelGenerator *lvl_generator;
+
 public:
 
     // Construtor.
-    LevelController(unsigned int tables, int max_life);
+    LevelController(unsigned int tables, int max_life, int difficulty);
 
     /// Retorna se o nível fora ou não finalizado.
     bool has_finished();
@@ -53,10 +57,13 @@ public:
     bool has_failed();
 
     /// Inserção de um novo pedido; inicia uma thread para ele.
-    void insert_order(Order *order);
+    void insert_order();
 
     /// Inicializa a thread do controlador.
     void start_thread();
+
+    // Inicializa e preenche o set de pedidos da fase atual
+    void setup_phase(int limit_order);
 };
 
 

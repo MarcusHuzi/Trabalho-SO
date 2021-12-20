@@ -11,9 +11,6 @@ private:
     // Nível de dificuldade do nível
     int difficulty;
 
-    // Quantidade de mesas no restaurante;
-    int tables;
-
     // Número de pedidos criados;
     int numberOfOrders;
 
