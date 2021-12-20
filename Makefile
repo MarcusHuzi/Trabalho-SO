@@ -5,8 +5,8 @@ RM = rm -f
 CFLAGS = -Wall -Wextra
 BIN = so_game
 ZIP = so_game.zip
-OBJ = obj/main.o obj/order.o obj/controller.o obj/menu.o obj/meal.o
-LIB = lib/order.hpp lib/controller.hpp lib/meal.hpp lib/menu.hpp
+OBJ = obj/main.o obj/order.o obj/order_controller.o obj/level_controller.o obj/order_semaphore.o obj/meal.o obj/menu.o
+LIB = lib/order.hpp lib/order_controller.hpp lib/level_controller.hpp lib/order_semaphore.hpp lib/meal.hpp lib/menu.hpp
 
 # ------------------- # --- DIRETIVAS PRINCIPAIS --- # -------------------- #
 
@@ -41,11 +41,17 @@ obj/main.o: src/main.cpp $(LIB)
 obj/order.o: src/order.cpp lib/order.hpp
 	$(CPP) -c src/order.cpp -o obj/order.o $(CFLAGS)
 
-obj/controller.o: src/controller.cpp lib/order.hpp lib/controller.hpp
-	$(CPP) -c src/controller.cpp -o obj/controller.o $(CFLAGS)
+obj/order_semaphore.o: src/order_semaphore.cpp lib/order_semaphore.hpp lib/order.hpp
+	$(CPP) -c src/order_semaphore.cpp -o obj/order_semaphore.o $(CFLAGS)
 
-obj/menu.o: src/menu.cpp lib/menu.hpp
-	$(CPP) -c src/menu.cpp -o obj/menu.o $(CFLAGS)
+obj/order_controller.o: src/order_controller.cpp lib/order_controller.hpp lib/order.hpp lib/order_semaphore.hpp
+	$(CPP) -c src/order_controller.cpp -o obj/order_controller.o $(CFLAGS)
+
+obj/level_controller.o: src/level_controller.cpp lib/level_controller.hpp lib/order.hpp lib/order_controller.hpp lib/order_semaphore.hpp
+	$(CPP) -c src/level_controller.cpp -o obj/level_controller.o $(CFLAGS)
 
 obj/meal.o: src/meal.cpp lib/meal.hpp
 	$(CPP) -c src/meal.cpp -o obj/meal.o $(CFLAGS)
+
+obj/menu.o: src/menu.cpp lib/menu.hpp
+	$(CPP) -c src/menu.cpp -o obj/menu.o $(CFLAGS)

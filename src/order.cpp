@@ -5,6 +5,7 @@ using namespace std;
 // Bibliotecas-padrão
 #include <string>
 #include <thread>
+<<<<<<< HEAD
 
 // Bibliotecas locais
 #include "../lib/order.hpp"
@@ -21,6 +22,25 @@ Order::Order(int id, int max_waiting_time, string meal_name, int prep_time){
 }
 
 
+=======
+#include <semaphore.h>
+
+// Bibliotecas locais
+#include "../lib/order.hpp"
+
+////////////////////////// MÉTODOS PRIVADOS ///////////////////////////////////
+
+// Construtor do pedido.
+Order::Order(int id, int max_waiting_time){
+    Order::id = id;
+    Order::clock = max_waiting_time;
+    Order::status = WAITING;
+}
+
+
+////////////////////////// MÉTODOS PÚBLICOS ///////////////////////////////////
+
+>>>>>>> b6708f3058613cbb2b91e4c1f7ec700024ba0ad5
 // Operador de comparação.
 bool operator< (const Order &left, const Order &right) {
     return left.id < right.id;
@@ -43,7 +63,13 @@ void Order::set_status(OrderStatus status){
     if(status == FULLFILLED)
         Order::clock = 3;
     else if(status == FAILED)
+<<<<<<< HEAD
         Order::clock = 1;
+=======
+        Order::clock = 3;
+    else
+        Order::clock = 8;
+>>>>>>> b6708f3058613cbb2b91e4c1f7ec700024ba0ad5
 }
 
 
@@ -83,6 +109,7 @@ string Order::to_string(){
             break;
     }
     return output;
+<<<<<<< HEAD
 }
 
 
@@ -92,4 +119,6 @@ void order_clock_reducer_thread(Order *order){
 		order->decrement_clock();
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
+=======
+>>>>>>> b6708f3058613cbb2b91e4c1f7ec700024ba0ad5
 }
