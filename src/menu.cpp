@@ -1,5 +1,5 @@
 // Bibliotecas padrão
-#include <random>
+#include <experimental/random>
 
 // Biblioteca local
 #include "../lib/menu.hpp"
@@ -26,11 +26,9 @@ Menu::Menu(int max_meals){
 // Métodos privados
 void Menu::generate_menu(){
     int count = 0, index;
-    default_random_engine generator;
-    uniform_real_distribution <int> distr(0, 15);
 
     while(count++ != Menu::max_meals){
-        index = distr(generator);
+        index = experimental::randint(0, 15);
         if(!used[index]){
             Menu::add_meal(new Meal(plates[index], prepare[index]));
             used[index] = 1;
@@ -49,8 +47,6 @@ void Menu::remove_meal(Meal *meal){
 }
 
 Meal *Menu::rand_meals(){
-    default_random_engine generator;
-    uniform_real_distribution <int> distr(0, max_meals);
-
-    return Menu::meals[distr(generator)];
+    int index = experimental::randint(0, max_meals);
+    return Menu::meals[index];
 }

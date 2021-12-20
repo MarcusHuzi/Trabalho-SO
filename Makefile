@@ -56,5 +56,5 @@ obj/meal.o: src/meal.cpp lib/meal.hpp
 obj/menu.o: src/menu.cpp lib/menu.hpp
 	$(CPP) -c src/menu.cpp -o obj/menu.o $(CFLAGS)
 
-obj/level_generator: src/level_generator.cpp lib/level_generator.hpp
+obj/level_generator.o: src/level_generator.cpp lib/level_generator.hpp
 	$(CPP) -c src/level_generator.cpp -o obj/level_generator.o $(CFLAGS)
