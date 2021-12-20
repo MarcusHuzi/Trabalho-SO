@@ -12,60 +12,89 @@ using namespace std;
 #include "../lib/order_controller.hpp"
 #include "../lib/order.hpp"
 
-/////////////////////////// FUNÇÃO AUXILIAR ///////////////////////////////////
 
-/* Força a thread requisitante a dormir enquanto não zerar o 
-relógio do pedido e enquanto não zerar a vida do jogador. */
-void wait_for_orders_clock(Order *order, int *current_life){
-    while(order->get_clock() > 0 && (*current_life) > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(800));
+////////////////////////// MÉTODOS PRIVADOS ///////////////////////////////////
+
+// Espera pelo relógio do pedido.
+bool OrderController::wait_for_orders_clock(Order *order, int *current_life){
+
+    // Validação
+    while(order->get_clock() > 0){
+        if((*current_life) <= 0)
+            return false;
+
+        // Espera
+        std::this_thread::sleep_for(std::chrono::milliseconds(980));
+    }
+
+    // Estado crítico
+    if(order->get_status() == WAITING){
+        order->set_status(FAILED);
+        return false;
+    }
+
+    // Fim convencional
+    return true;
 }
 
 
-////////////////////////// MÉTODOS PRIVADOS ///////////////////////////////////
+// Algoritmo de encerramento da lógica da thread do controlador do pedido.
+void OrderController::end_thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tables, int *current_life){
+
+    // Espera
+    wait_for_orders_clock(OrderController::order, current_life);
+
+    // Marcação
+    OrderController::active = false;
+    OrderController::removed = true;
+
+    // Liberação
+    if(kitchen != NULL)
+        kitchen->release();
+    if(tables != NULL)
+        tables->release();
+}
+
 
 // Lógica da thread do controlador do pedido.
 void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tables, int *current_life){
 
     // Espera por uma mesa
-    if(tables->wait(OrderController::order, current_life) == false) {
-        wait_for_orders_clock(OrderController::order, current_life);
-        OrderController::active = false;
-        OrderController::removed = true;
-        return;
-    }
+    if( tables->wait(OrderController::order, current_life) == false )
+        return OrderController::end_thread_logic(NULL, NULL, current_life);
+    
+    // Ativação do pedido
     OrderController::active = true;
 
     // Espera pela liberação da cozinha
-    if(kitchen->wait(OrderController::order, current_life) == false){
-        wait_for_orders_clock(OrderController::order, current_life);
-        OrderController::active = false;
-        OrderController::removed = true;
-        tables->release();
-        return;
+    if( kitchen->wait(OrderController::order, current_life) == false ){
+        if(OrderController::order->get_status() == WAITING && (*current_life) > 0)
+            OrderController::order->set_status(FAILED);
+        return OrderController::end_thread_logic(NULL, tables, current_life);
     }
 
     // Estado de preparação
     OrderController::order->set_status(PREPARING);
 
     // Espera pelo relógio chegar a zero.
-    wait_for_orders_clock(OrderController::order, current_life);
-
-    // Libera a vaga da cozinha
-    kitchen->release();
+    if( wait_for_orders_clock(OrderController::order, current_life) == false )
+        return OrderController::end_thread_logic(kitchen, tables, current_life);
 
     // Atualiza para estado de servindo
     OrderController::order->set_status(SERVING);
 
+    // Libera a vaga da cozinha
+    kitchen->release();
+
     // Espera pelo relógio chegar a zero novamente
-    wait_for_orders_clock(OrderController::order, current_life);
+    if( wait_for_orders_clock(OrderController::order, current_life) == false )
+        return OrderController::end_thread_logic(NULL, tables, current_life);
 
-    // Marca como removido e inativo
-    OrderController::removed = true;
-    OrderController::active = false;
+    // Estado de término
+    OrderController::order->set_status(FULLFILLED);
 
-    // Liberação da mesa
-    tables->release();
+    // Finalização
+    return OrderController::end_thread_logic(NULL, tables, current_life);
 }
 
 
@@ -82,7 +111,7 @@ OrderController::OrderController(Order *order, OrderSemaphore *kitchen, OrderSem
 
 // Operador comparativo.
 bool operator< (const OrderController &left, const OrderController &right){
-    return left.order->get_id() < right.order->get_id();
+    return left.order < right.order;
 }
 
 

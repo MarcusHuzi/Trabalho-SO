@@ -37,10 +37,7 @@ private:
 
     // Vidas atuais do jogador
     int current_life;
-
-    /// Realiza operações de processamento de um pedido corrente.
-    void process_order(Order *order);
-
+    
     /// Operador para controle da thread.
     void thread_controller();
 

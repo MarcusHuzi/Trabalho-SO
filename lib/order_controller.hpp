@@ -27,6 +27,17 @@ private:
     // Utilitários de sincronização.
     bool removed, active;
 
+    /** 
+     * Força a thread requisitante a dormir enquanto não zerar o 
+     * relógio do pedido e enquanto não zerar a vida do jogador. 
+     * @return verdadeiro se foi um final de execução convencional, 
+     * falso se fora interrompido pelo final do jogo.
+     * */
+    bool wait_for_orders_clock(Order *order, int *current_life);
+
+    /// Algoritmo de encerramento da lógica da thread do controlador do pedido.
+    void end_thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tables, int *current_life);
+
     // Função de controle da thread interna.
     void thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tables, int *current_life);
 
