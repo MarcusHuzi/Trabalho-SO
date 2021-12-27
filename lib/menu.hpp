@@ -20,6 +20,7 @@ private:
 
 public:
 
+    // Construtor
     Menu(int max_meals);
 
     // Adiciona refeição ao menu do restaurante
@@ -30,6 +31,12 @@ public:
 
     // Retorna uma refeição do menu
     Meal rand_meals();
+
+    // Imprime o Menu completo
+    void list_menu();
+
+    // Deleta todas as refeições
+    void clear_meals();
 };
 
 #endif /*_MENU_H_*/

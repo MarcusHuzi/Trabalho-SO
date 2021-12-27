@@ -26,6 +26,12 @@ using namespace std;
 #include "../lib/order.hpp"
 #include "../lib/level_controller.hpp"
 
+// Limpeza de console dependente do SO
+#ifdef __unix__
+    #define clear_console() system("clear")
+#elif defined(_WIN32) || defined(WIN32)
+    #define clear_console() system("CLS")
+#endif
 
 ////////////////////////// FUNÇÕES AUXILIARES /////////////////////////////////
 
@@ -36,8 +42,9 @@ void print_options(){
 	cout << "1 - Iniciar novo jogo - Dificuldade Fácil" << endl;
 	cout << "2 - Iniciar novo jogo - Dificuldade Média" << endl;
 	cout << "3 - Iniciar novo jogo - Dificuldade Difícil" << endl;
-	cout << "4 - Sair do jogo" << endl << endl;
-	cout << "Sua escolha:";
+	cout << "4 - Instruções do jogo" << endl;
+	cout << "5 - Sair do jogo" << endl << endl;
+	cout << "Sua escolha: ";
 }
 
 // Função para inserções de operações inválidas
@@ -47,9 +54,24 @@ void print_invalid(){
 }
 
 // Função para saída do jogo
-void print_exit(){
-	cout << "Você escolheu sair do jogo" << endl;
-	cout << "Obrigado por jogar!!!" << endl;
+void print_exit(int sucess_levels, int failed_levels){
+	cout << endl << "Você escolheu sair do jogo." << endl;
+	cout << "Enquanto jogava, você venceu " << sucess_levels << " vez(es) e perdeu " << failed_levels << endl;
+	cout << endl << "Obrigado por jogar!!!" << endl;
+}
+
+// Função para instruções do jogo
+void print_instructions(){
+	cout << endl << endl;
+	cout << "------------------------Termos de Serviço do Restaurante------------------------" << endl;
+	cout << "Seguem abaixo os procedimentos que você, novo(a) gerente, deverá seguir diariamente para satifazer nossos clientes." << endl;
+	cout << "1 - Deve selecionar uma dificuldade (fácil, média ou difícil). A dificuldade do serviço define a quantidade de mesas a serem servidas" << endl;
+	cout << "    assim como a quantidade de refeições disponíveis para os clientes escolherem. Para todas as dificuldades, você poderá cometer até 3 erros antes de ser demitido." << endl;
+	cout << "2 - Devido à pandemia da COVID-19, foi necessária uma redução no número de cozinheiros. Você deverá coordenar o atendimento junto com o único cozinheiro" << endl;
+	cout << "    presente no restaurante; ele já foi instruído a seguir suas ordens e priorizar os pedidos que você escolher." << endl;
+	cout << "3 - É sua responsabilidade analisar quanto tempo cada cliente está esperando e quanto tempo é necessário para o preparo da refeição solicitada por ele." << endl;
+	cout << "4 - Após finalizar o serviço do dia, você pode escolher entre coordenar o restaurante por mais turnos ou se demitir e procurar outras oportunidades." << endl;
+	cout << endl << "Mais uma vez, seja bem vindo(a) ao nosso restaurante" << endl << endl;
 }
 
 //////////////////////////////// MAIN() ///////////////////////////////////////
@@ -62,29 +84,34 @@ int main(void){
 	// Máximo de pedidos
 	int limit_order;
 
-	// Pedidos
-	// Order order_a = Order(9, 5);
-	// Order order_b = Order(21, 9);
-	// Order order_c = Order(37, 7);
-    // Order order_d = Order(7, 10);
-    // Order order_e = Order(12, 22);
-    // Order order_f = Order(91, 14);
+	// Quantidade de níveis vencidos
+	int sucess_levels = 0;
 
-	// Controlador
-	//LevelController controller = LevelController(3, 3);
+	// Quantidade de níveis perdidos
+	int failed_levels = 0;
 
-	while(option != 4){
+	while(option != 5){
+		clear_console();
 
 		// Recebendo uma operação válida
 		print_options();
 		cin >> option;
-		while(option <= 0 || option > 4){
+		while(option <= 0 || option > 5){
 			print_invalid();
 			cin >> option;
 		}
 
-		if(option == 4){
-			print_exit();
+		// Imprimindo instruções até seleção da dificuldade
+		while(option == 4){
+			print_instructions();
+			cout << endl << endl;
+			print_options();
+			cin >> option;
+		}
+
+		// Caso usuário queira parar de jogar
+		if(option == 5){
+			print_exit(sucess_levels, failed_levels);
 			break;
 		}
 
@@ -92,23 +119,18 @@ int main(void){
 		LevelController controller = LevelController(5 * option, 3, option);
 
 		// Determinando limite de pedidos da fase atual
-		limit_order = (option * 5) + 10;
+		limit_order = (option + 1) * 5;
 
 		// Cria pedidos da fase atual
 		controller.setup_phase(limit_order);
 
 		// Inicialização da thread do controlador
 		controller.start_thread();
+
+		// Atualizar contagem de níveis vencidos e perdidos
+		if(!controller.has_failed())	sucess_levels++;
+		else	failed_levels++;
 	}
-
-    // Inserção dos pedidos
-    // controller.insert_order(&order_a);
-    // controller.insert_order(&order_b);
-    // controller.insert_order(&order_c);
-    // controller.insert_order(&order_d);
-    // controller.insert_order(&order_e);
-    // controller.insert_order(&order_f);
-
 
 	return EXIT_SUCCESS;
 }

@@ -24,6 +24,12 @@ public:
 
     // Cria novos pedidos
     Order *new_order();
+
+    // Imprime Refeições do Menu
+    void plates();
+
+    // Deleta menu
+    void erase_menu();
 };
 
 #endif /* _LEVEL_GENERATOR_H_ */

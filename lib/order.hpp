@@ -74,6 +74,9 @@ public:
 
     /// Retorna uma visualização do pedido.
     string to_string();
+
+    // Retorna refeição associada
+    Meal *get_order_meal();
 };
 
 

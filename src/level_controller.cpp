@@ -43,6 +43,9 @@ void LevelController::thread_controller(){
 
         // Limpeza do console
         clear_console();
+    
+        // Imprime cardápio atual
+		LevelController::print_menu();
 
         // Percorre todos os pedidos atuais e os processa
         for(order_itr = LevelController::current_orders.begin(); order_itr != LevelController::current_orders.end();){
@@ -69,6 +72,9 @@ void LevelController::thread_controller(){
             // Possível remoção
             if((*order_itr)->is_removed() == true){
                 LevelController::current_orders.erase(order_itr++);
+                delete (*order_itr)->get_order()->get_order_meal();
+                delete (*order_itr)->get_order();
+                delete *order_itr;
             }else{
                 ++order_itr;
             }
@@ -101,6 +107,8 @@ void LevelController::thread_controller(){
     }else{
         cout << "LEVEL FAILED" << endl;
     }
+    LevelController::lvl_generator->erase_menu();
+    delete LevelController::lvl_generator;
 }
 
 
@@ -146,8 +154,15 @@ void LevelController::start_thread(){
     LevelController::self_thread.join();
 }
 
+// Inicializa as ordens dos clientes
 void LevelController::setup_phase(int limit_order){
     int count = 0;
     while(count++ != limit_order)
         LevelController::insert_order();
+}
+
+// Imprime Menu do restaurante
+void LevelController::print_menu(){
+    cout << endl << endl << "----------------------------CARDÁPIO DE HOJE------------------------------------" << endl;
+    LevelController::lvl_generator->plates();
 }

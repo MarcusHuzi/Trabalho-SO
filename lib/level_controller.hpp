@@ -64,6 +64,9 @@ public:
 
     // Inicializa e preenche o set de pedidos da fase atual
     void setup_phase(int limit_order);
+
+    // Imprime o Menu do restaurante
+    void print_menu();
 };
 
 
