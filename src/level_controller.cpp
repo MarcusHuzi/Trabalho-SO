@@ -35,6 +35,9 @@ void LevelController::thread_controller(){
     // Usado para computar tempo decorrido
     chrono::steady_clock::time_point start_time;
 
+    // Usado para restringir a leitura do menu a 1 vez
+    bool read = false;
+
     // Executa enquanto não finalizar o nível
     while(LevelController::finished == false){
 
@@ -46,6 +49,11 @@ void LevelController::thread_controller(){
     
         // Imprime cardápio atual
 		LevelController::print_menu();
+
+        // Faz com que a thread durma 1 vez, para a leitura do menu da fase atual
+        if(!read)
+            std::this_thread::sleep_for(chrono::milliseconds(LevelController::lvl_generator->get_difficulty() * 2000));
+        read = true;
 
         // Percorre todos os pedidos atuais e os processa
         for(order_itr = LevelController::current_orders.begin(); order_itr != LevelController::current_orders.end();){

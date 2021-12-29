@@ -28,6 +28,9 @@ public:
     // Imprime Refeições do Menu
     void plates();
 
+    // Retorna dificuldade
+    int get_difficulty();
+
     // Deleta menu
     void erase_menu();
 };

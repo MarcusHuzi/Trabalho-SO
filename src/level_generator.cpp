@@ -25,6 +25,8 @@ void LevelGenerator::plates(){
     cout << endl;
 }
 
+int LevelGenerator::get_difficulty(){ return LevelGenerator::difficulty; }
+
 void LevelGenerator::erase_menu(){
     LevelGenerator::menu->clear_meals();
     delete menu;
