@@ -128,7 +128,7 @@ bool OrderController::is_active(){
 
 
 // Retorna a referência ao pedido controlado.
-Order *OrderController::get_order(){
+Order *OrderController::get_order() const {
     return OrderController::order;
 }
 

@@ -56,11 +56,12 @@ public:
     bool is_active();
 
     /// Retorna referência para o pedido.
-    Order *get_order();
+    Order *get_order() const;
 
     /// Inicializa a própria thread.
     void start_thread();
 };
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

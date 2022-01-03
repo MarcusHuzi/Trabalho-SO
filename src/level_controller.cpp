@@ -23,6 +23,17 @@ using namespace std;
     #define clear_console() system("CLS")
 #endif
 
+/////////////////////////// STRUCT AUXILIAR ///////////////////////////////////
+
+/// Estrutura auxiliar para buscar por número de identificação do pedido.
+struct find_by_order_id {
+private:
+    int id;
+public:
+    find_by_order_id(const int &id){ find_by_order_id::id = id; }
+    bool operator()(OrderController* const &oc){ return oc->get_order()->get_id() == id; }
+};
+
 
 ////////////////////////// MÉTODOS PRIVADOS ///////////////////////////////////
 
@@ -102,11 +113,25 @@ void LevelController::thread_controller(){
 
         // Verificação de liberação da cozinha
         if(LevelController::kitchen->is_free()){
+
+            // Obtenção do ID pelo jogador
             cout << endl << "Escolha o ID do pedido a ser priorizado pela cozinha a seguir: ";
             int id;
             cin >> id;
-            LevelController::kitchen->set_preferential_order_id(id);
-            std::this_thread::sleep_for(chrono::milliseconds(1000));
+
+            // Verificação do ID
+            set<OrderController *>::iterator searcher;
+            searcher = std::find_if(LevelController::current_orders.begin(), LevelController::current_orders.end(), find_by_order_id(id));
+            if(searcher != LevelController::current_orders.end() && (*searcher)->is_active() == true){
+
+                // Seleção de prioridade e espera pela ocupação da cozinha
+                LevelController::kitchen->set_preferential_order_id(id);
+                while(LevelController::kitchen->is_free()) std::this_thread::sleep_for(chrono::milliseconds(100));
+            }
+            
+            // Aviso de indisponibilidade de ID
+            else cout << "O número de identificação informado não corresponde a pedido algum." << endl;
+            std::this_thread::sleep_for(chrono::milliseconds(1600));
         }
 
         // Contagem do tempo decorrido
