@@ -31,10 +31,10 @@ private:
     set<OrderController *> current_orders;
 
     // Semáforo da cozinha.
-    OrderSemaphore kitchen;
+    OrderSemaphore *kitchen = NULL;
 
     // Semáforo das mesas
-    OrderSemaphore tables;
+    OrderSemaphore *tables = NULL;
 
     // Vidas atuais do jogador
     int current_life;

@@ -65,7 +65,8 @@ void LevelController::thread_controller(){
                 Order *order = (*order_itr)->get_order();
                 
                 // Decremento de relógio
-                order->decrement_clock();
+                if(LevelController::kitchen->is_free() == false)
+                    order->decrement_clock();
 
                 // Imprime o pedido
                 cout << order->to_string() << endl;
@@ -99,6 +100,15 @@ void LevelController::thread_controller(){
             LevelController::failed = true;
         }
 
+        // Verificação de liberação da cozinha
+        if(LevelController::kitchen->is_free()){
+            cout << endl << "Escolha o ID do pedido a ser priorizado pela cozinha a seguir: ";
+            int id;
+            cin >> id;
+            LevelController::kitchen->set_preferential_order_id(id);
+            std::this_thread::sleep_for(chrono::milliseconds(1000));
+        }
+
         // Contagem do tempo decorrido
         auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start_time).count();
 
@@ -127,8 +137,8 @@ LevelController::LevelController(unsigned int tables, int max_life, int difficul
     LevelController::finished = false;
     LevelController::failed = false;
     LevelController::self_thread = thread(&LevelController::thread_controller, this);
-    LevelController::kitchen = OrderSemaphore();
-    LevelController::tables = OrderSemaphore(tables);
+    LevelController::kitchen = new OrderSemaphore(SEMAPHORE_DISABLE_SELECTION);
+    LevelController::tables = new OrderSemaphore(tables, SEMAPHORE_DISABLE_PREFERENCE);
     LevelController::current_life = max_life;
     LevelController::lvl_generator = new LevelGenerator(difficulty);
 }
@@ -149,7 +159,7 @@ bool LevelController::has_failed(){
 // Inserção de um novo pedido; inicia uma thread para ele.
 void LevelController::insert_order(){
     Order *order = LevelController::lvl_generator->new_order();
-    OrderController *order_controller = new OrderController(order, &(LevelController::kitchen), &(LevelController::tables), &(LevelController::current_life));
+    OrderController *order_controller = new OrderController(order, LevelController::kitchen, LevelController::tables, &(LevelController::current_life));
     LevelController::current_orders.insert(order_controller);
 }
 
