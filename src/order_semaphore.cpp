@@ -59,8 +59,14 @@ bool OrderSemaphore::wait(Order *order, int *current_life){
         }
     }
 
+    // Espera pelo controle do sinal
+    sem_wait(&(OrderSemaphore::signal_semaphore));
+
     // Incremento do sinal
     OrderSemaphore::current_signal += 1;
+
+    // Liberação do controle do sinal
+    sem_post(&(OrderSemaphore::signal_semaphore));
 
     // Retorno convencional
     return true;

@@ -104,7 +104,7 @@ void LevelController::thread_controller(){
                     order->decrement_clock();
 
                 // Imprime o pedido
-                cout << order->to_string() << endl;
+                cout << order->to_string() << endl << endl;
 
                 // Verificação de falha
                 if(order->get_status() == FALHOU && order->get_clock() <= 0){
@@ -145,14 +145,26 @@ void LevelController::thread_controller(){
             searcher = std::find_if(LevelController::current_orders.begin(), LevelController::current_orders.end(), find_by_order_id(id));
             if(searcher != LevelController::current_orders.end() && (*searcher)->is_active() == true){
 
-                // Seleção de prioridade e espera pela ocupação da cozinha
-                LevelController::kitchen->set_preferential_order_id(id);
-                while(LevelController::kitchen->is_free()) std::this_thread::sleep_for(chrono::milliseconds(100));
+                // Verificação do status
+                if((*searcher)->get_order()->get_status() == ESPERANDO){
+
+                    // Seleção de prioridade e espera pela ocupação da cozinha
+                    LevelController::kitchen->set_preferential_order_id(id);
+                    while(LevelController::kitchen->is_free()) std::this_thread::sleep_for(chrono::milliseconds(100));
+                }
+
+                // Aviso de invalidade de status
+                else {
+                    cout << "O pedido informado não está atualmente em etapa de espera." << endl;
+                    std::this_thread::sleep_for(chrono::milliseconds(1200));
+                }
             }
             
             // Aviso de indisponibilidade de ID
-            else cout << "O número de identificação informado não corresponde a pedido algum." << endl;
-            std::this_thread::sleep_for(chrono::milliseconds(1600));
+            else {
+                cout << "O número de identificação informado não corresponde a pedido algum." << endl;
+                std::this_thread::sleep_for(chrono::milliseconds(1200));
+            }
         }
 
         // Contagem do tempo decorrido

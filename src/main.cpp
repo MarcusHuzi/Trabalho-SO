@@ -103,6 +103,7 @@ int main(void){
 
 		// Imprimindo instruções até seleção da dificuldade
 		while(option == 4){
+			clear_console();
 			print_instructions();
 			cout << endl << endl;
 			print_options();
@@ -128,8 +129,10 @@ int main(void){
 		controller.start_thread();
 
 		// Atualizar contagem de níveis vencidos e perdidos
-		if(!controller.has_failed())	sucess_levels++;
-		else	failed_levels++;
+		if(controller.has_failed() == false)	
+			sucess_levels++;
+		else	
+			failed_levels++;
 	}
 
 	return EXIT_SUCCESS;
