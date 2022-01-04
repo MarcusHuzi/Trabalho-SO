@@ -35,6 +35,29 @@ public:
 };
 
 
+/////////////////////////// FUNÇÃO AUXILIAR ///////////////////////////////////
+
+// Função para verificar se todos os pedidos já foram efetuados
+bool all_order_done(set <OrderController *> current_orders){
+    set<OrderController *>::iterator order_itr;
+
+    for(order_itr = current_orders.begin(); order_itr != current_orders.end(); order_itr++){
+
+        // Processamento
+        if((*order_itr)->is_active() == true){
+
+            // Captura do pedido
+            Order *order = (*order_itr)->get_order();
+
+            // Análise do status do pedido, em caso de WAITING retorna-se falso
+            if(order->get_status() == WAITING)  return false;
+        }
+    }
+
+    return true;
+}
+
+
 ////////////////////////// MÉTODOS PRIVADOS ///////////////////////////////////
 
 // Operador para controle da thread.
@@ -66,6 +89,7 @@ void LevelController::thread_controller(){
             std::this_thread::sleep_for(chrono::milliseconds(LevelController::lvl_generator->get_difficulty() * 2000));
         read = true;
 
+        cout << "Remaining Orders: "  << LevelController::current_orders.size() << endl << endl;
         // Percorre todos os pedidos atuais e os processa
         for(order_itr = LevelController::current_orders.begin(); order_itr != LevelController::current_orders.end();){
 
@@ -76,7 +100,7 @@ void LevelController::thread_controller(){
                 Order *order = (*order_itr)->get_order();
                 
                 // Decremento de relógio
-                if(LevelController::kitchen->is_free() == false)
+                if(LevelController::kitchen->is_free() == false || all_order_done(LevelController::current_orders))
                     order->decrement_clock();
 
                 // Imprime o pedido
@@ -92,9 +116,6 @@ void LevelController::thread_controller(){
             // Possível remoção
             if((*order_itr)->is_removed() == true){
                 LevelController::current_orders.erase(order_itr++);
-                delete (*order_itr)->get_order()->get_order_meal();
-                delete (*order_itr)->get_order();
-                delete *order_itr;
             }else{
                 ++order_itr;
             }
@@ -111,8 +132,8 @@ void LevelController::thread_controller(){
             LevelController::failed = true;
         }
 
-        // Verificação de liberação da cozinha
-        if(LevelController::kitchen->is_free()){
+        // Verificação de liberação da cozinha e se há pedidos aguardando
+        if(LevelController::kitchen->is_free() && !all_order_done(LevelController::current_orders)){
 
             // Obtenção do ID pelo jogador
             cout << endl << "Escolha o ID do pedido a ser priorizado pela cozinha a seguir: ";
@@ -206,6 +227,6 @@ void LevelController::setup_phase(int limit_order){
 
 // Imprime Menu do restaurante
 void LevelController::print_menu(){
-    cout << endl << endl << "----------------------------CARDÁPIO DE HOJE------------------------------------" << endl;
+    cout << endl << endl << "-------------------------------------MENU------------------------------------" << endl;
     LevelController::lvl_generator->plates();
 }

@@ -60,11 +60,11 @@ void Menu::list_menu(){
     vector <Meal>::iterator it;
 
     for(it = Menu::meals.begin(); it != Menu::meals.end(); it++, count++){
-        cout << count << " - Nome: " << it->get_meal_name();
-        if(it->get_meal_name().length() <= 5 && count < 10)  cout << "\t\t\t\t\t\tTempo de preparo: ";
-        else if(it->get_meal_name().length() <= 12)  cout << "\t\t\t\t\tTempo de preparo: ";
-        else if(it->get_meal_name().length() <= 20)  cout << "\t\t\t\tTempo de preparo: ";
-        else    cout << "\t\t\tTempo de preparo: ";
+        cout << count << " - Name: " << it->get_meal_name();
+        if(it->get_meal_name().length() <= 5 && count < 10)  cout << "\t\t\t\t\t\tWaiting time: ";
+        else if(it->get_meal_name().length() <= 12)  cout << "\t\t\t\t\tWaiting time: ";
+        else if(it->get_meal_name().length() <= 20)  cout << "\t\t\t\tWaiting time: ";
+        else    cout << "\t\t\tWaiting time: ";
         cout << it->get_prep_time() << endl;
     }
 }
