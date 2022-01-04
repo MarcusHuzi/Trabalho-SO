@@ -5,9 +5,9 @@
 * SCC0140, para o segundo semestre letivo de 2021.
 *
 * Autores: 
-* :
-* Tulio Santana Ramos, 11795526.
 * João Lucas Rodrigues Constantino, 11795763.
+* Marcus Vinícius Teixeira Huziwara, 11834432.
+* Tulio Santana Ramos, 11795526.
 *
 */
 ///////////////////////////// IMPORTAÇÕES /////////////////////////////////////
