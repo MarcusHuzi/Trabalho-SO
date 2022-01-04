@@ -22,7 +22,7 @@ int Environment::get_max_life(){
 	return Environment::max_life;
 }
 
-int Environment::set_max_life(in x){
+int Environment::set_max_life(int x){
 	Environment::max_life = x;
 	return Environment::max_life;
 }

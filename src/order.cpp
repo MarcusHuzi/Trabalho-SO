@@ -16,7 +16,7 @@ using namespace std;
 Order::Order(int id, int max_waiting_time, Meal *meal){
     Order::id = id;
     Order::clock = max_waiting_time;
-    Order::status = WAITING;
+    Order::status = ESPERANDO;
     Order::meal = new Meal(meal->get_meal_name(), meal->get_prep_time());
 }
 
@@ -42,9 +42,9 @@ void Order::set_status(OrderStatus status){
     Order::status = status; 
 
     // Atualização de relógio
-    if(status == FULLFILLED)
+    if(status == SATISFEITO)
         Order::clock = 3;
-    else if(status == FAILED)
+    else if(status == FALHOU)
         Order::clock = 3;
     else
         Order::clock = 8;
@@ -60,34 +60,34 @@ string Order::to_string(){
     string output;
     //Meal *meal = Order::meal;
 
-    output.append("Client " + std::to_string(Order::id) + " wants a tasty " + Order::meal->get_meal_name() + ".\n");
+    output.append("Cliente " + std::to_string(Order::id) + " quer um(a) delicioso(a) " + Order::meal->get_meal_name() + ".\n");
 
     switch(Order::status){
-        case WAITING:
-            output.append("This order is currently [WAITING] ");
-            output.append("Order " + std::to_string(Order::id) + ": ");
+        case ESPERANDO:
+            output.append("Este pedido se encontra [ESPERANDO] ");
+            output.append("Pedido " + std::to_string(Order::id) + ": ");
             output.append(std::to_string(Order::clock));
-            output.append(" seconds left for starvation.");
+            output.append(" segundos restantes para fome intensa.");
             break;
-        case PREPARING:
-            output.append("This order is currently [PREPARING] ");
-            output.append("Order " + std::to_string(Order::id) + ": ");
+        case PREPARANDO:
+            output.append("Este pedido se encontra [PREPARANDO] ");
+            output.append("Pedido " + std::to_string(Order::id) + ": ");
             output.append(std::to_string(Order::clock));
-            output.append(" seconds left for preparation.");
+            output.append(" segundos restantes para preparo.");
             break;
-        case SERVING:
-            output.append("This order is currently [SERVING] ");
-            output.append("Order " + std::to_string(Order::id) + ": ");
+        case SERVINDO:
+            output.append("Este pedido se encontra [SERVINDO] ");
+            output.append("Pedido " + std::to_string(Order::id) + ": ");
             output.append(std::to_string(Order::clock));
-            output.append(" seconds left to fullfill.");
+            output.append(" segundos restantes para satisfazer cliente.");
             break;
-        case FULLFILLED:
-            output.append("This order is currently [FULLFILLED] ");
-            output.append("Order " + std::to_string(Order::id) + ".");
+        case SATISFEITO:
+            output.append("Este pedido se encontra [SATISFEITO] ");
+            output.append("Pedido " + std::to_string(Order::id) + ".");
             break;
         default:
-            output.append("This order is currently [FAILED] ");
-            output.append("Order " + std::to_string(Order::id) + ".");
+            output.append("Este pedido se encontra [FALHOU] ");
+            output.append("Pedido " + std::to_string(Order::id) + ".");
             break;
     }
     return output;

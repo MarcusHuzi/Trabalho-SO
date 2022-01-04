@@ -28,8 +28,8 @@ bool OrderController::wait_for_orders_clock(Order *order, int *current_life){
     }
 
     // Estado crítico
-    if(order->get_status() == WAITING){
-        order->set_status(FAILED);
+    if(order->get_status() == ESPERANDO){
+        order->set_status(FALHOU);
         return false;
     }
 
@@ -68,20 +68,20 @@ void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tabl
 
     // Espera pela liberação da cozinha
     if( kitchen->wait(OrderController::order, current_life) == false ){
-        if(OrderController::order->get_status() == WAITING && (*current_life) > 0)
-            OrderController::order->set_status(FAILED);
+        if(OrderController::order->get_status() == ESPERANDO && (*current_life) > 0)
+            OrderController::order->set_status(FALHOU);
         return OrderController::end_thread_logic(NULL, tables, current_life);
     }
 
     // Estado de preparação
-    OrderController::order->set_status(PREPARING);
+    OrderController::order->set_status(PREPARANDO);
 
     // Espera pelo relógio chegar a zero.
     if( wait_for_orders_clock(OrderController::order, current_life) == false )
         return OrderController::end_thread_logic(kitchen, tables, current_life);
 
     // Atualiza para estado de servindo
-    OrderController::order->set_status(SERVING);
+    OrderController::order->set_status(SERVINDO);
 
     // Libera a vaga da cozinha
     kitchen->release();
@@ -91,7 +91,7 @@ void OrderController::thread_logic(OrderSemaphore *kitchen, OrderSemaphore *tabl
         return OrderController::end_thread_logic(NULL, tables, current_life);
 
     // Estado de término
-    OrderController::order->set_status(FULLFILLED);
+    OrderController::order->set_status(SATISFEITO);
 
     // Finalização
     return OrderController::end_thread_logic(NULL, tables, current_life);

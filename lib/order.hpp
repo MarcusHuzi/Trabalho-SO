@@ -15,11 +15,11 @@ using namespace std;
 
 // Estado de um pedido em um restaurante.
 enum OrderStatus {
-    WAITING, 
-    PREPARING, 
-    SERVING, 
-    FULLFILLED, 
-    FAILED
+    ESPERANDO, 
+    PREPARANDO, 
+    SERVINDO, 
+    SATISFEITO, 
+    FALHOU
 };
 
 

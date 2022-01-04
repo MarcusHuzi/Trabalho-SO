@@ -49,8 +49,8 @@ bool all_order_done(set <OrderController *> current_orders){
             // Captura do pedido
             Order *order = (*order_itr)->get_order();
 
-            // Análise do status do pedido, em caso de WAITING retorna-se falso
-            if(order->get_status() == WAITING)  return false;
+            // Análise do status do pedido, em caso de ESPERANDO retorna-se falso
+            if(order->get_status() == ESPERANDO)  return false;
         }
     }
 
@@ -89,7 +89,7 @@ void LevelController::thread_controller(){
             std::this_thread::sleep_for(chrono::milliseconds(LevelController::lvl_generator->get_difficulty() * 2000));
         read = true;
 
-        cout << "Remaining Orders: "  << LevelController::current_orders.size() << endl << endl;
+        cout << "Pedidos restantes: "  << LevelController::current_orders.size() << endl << endl;
         // Percorre todos os pedidos atuais e os processa
         for(order_itr = LevelController::current_orders.begin(); order_itr != LevelController::current_orders.end();){
 
@@ -107,7 +107,7 @@ void LevelController::thread_controller(){
                 cout << order->to_string() << endl;
 
                 // Verificação de falha
-                if(order->get_status() == FAILED && order->get_clock() <= 0){
+                if(order->get_status() == FALHOU && order->get_clock() <= 0){
                     if(LevelController::current_life > 0)
                         LevelController::current_life -= 1;
                 }
@@ -167,9 +167,9 @@ void LevelController::thread_controller(){
 
     // Mensagem final.
     if(LevelController::failed == false){
-        cout << "LEVEL ACCOMPLISHED" << endl;
+        cout << "Você venceu este nível!" << endl;
     }else{
-        cout << "LEVEL FAILED" << endl;
+        cout << "Você perdeu este nível, mais sorte na próxima." << endl;
     }
     LevelController::lvl_generator->erase_menu();
     delete LevelController::lvl_generator;
