@@ -63,7 +63,11 @@ bool OrderSemaphore::wait(Order *order, int *current_life){
     sem_wait(&(OrderSemaphore::signal_semaphore));
 
     // Incremento do sinal
-    OrderSemaphore::current_signal += 1;
+    if(OrderSemaphore::current_signal < OrderSemaphore::max_signal){
+        OrderSemaphore::current_signal += 1;
+    }else{
+        return OrderSemaphore::wait(order, current_life);
+    }
 
     // Liberação do controle do sinal
     sem_post(&(OrderSemaphore::signal_semaphore));
